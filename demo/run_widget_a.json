@@ -1,0 +1,112 @@
+{
+  "scenario_id": "widget_a",
+  "disruption_scenario": "Supplier X has delayed shipment of 5,000 units of Widget-A by 10 days due to port congestion.",
+  "persona": "Operations Manager",
+  "architecture": "sequential",
+  "guardrail_status": "PASSED (Category: ok)",
+  "blackboard_evolution": [
+    {
+      "step": 1,
+      "agent": "Supplier Monitoring Agent",
+      "section": "supplier_status",
+      "content": "SUP-201 shipment delayed by 10 days due to port congestion; 5,000 units of Widget-A affected."
+    },
+    {
+      "step": 2,
+      "agent": "Demand Forecasting Agent",
+      "section": "demand_forecast",
+      "content": "Projected demand over 10-day delay: 2,912 units of Widget-A."
+    },
+    {
+      "step": 3,
+      "agent": "Inventory Agent",
+      "section": "inventory_projection",
+      "content": "Current inventory: 3,200 units. Demand: 2,912 units. Projected buffer remaining: 288 units. Shortfall = 0 units. Stock is SUFFICIENT."
+    },
+    {
+      "step": 4,
+      "agent": "Alternative Supplier Agent",
+      "section": "alternative_suppliers",
+      "content": "Backup vendors evaluated: Vertex Logistics (lead time 6 days, premium 12%), Anchor Bay (lead time 8 days, premium 8%)."
+    },
+    {
+      "step": 5,
+      "agent": "Cost Agent",
+      "section": "cost_analysis",
+      "content": "Wait option cost delta: $0.00. Vertex expedited backup: $14,400 for 1,200 units."
+    },
+    {
+      "step": 6,
+      "agent": "Google-ADK:ComplianceRiskAgent",
+      "section": "compliance_audit",
+      "content": "A2A Audit completed: Vulnerability Index 60/100 (ELEVATED). ISO 9001 certified: True. Recommendation: Buffer sufficient; maintain daily port clearance monitoring."
+    }
+  ],
+  "a2a_dialogue": {
+    "protocol": "A2A/1.0",
+    "request": {
+      "sender": "CrewAI:SupplierMonitoringAgent",
+      "recipient": "Google-ADK:ComplianceRiskAgent",
+      "action": "AUDIT_SUPPLIER_RISK",
+      "payload": {"supplier_id": "SUP-201", "product": "Widget-A", "delay_days": 10, "shortfall_units": 0}
+    },
+    "response": {
+      "sender": "Google-ADK:ComplianceRiskAgent",
+      "recipient": "CrewAI:SupplierMonitoringAgent",
+      "performative": "INFORM",
+      "payload": {
+        "risk_tier": "ELEVATED",
+        "risk_score_index": 60,
+        "recommendation": "Buffer sufficient; maintain daily port clearance monitoring.",
+        "framework_provenance": "Google ADK Agent (google.adk) via A2A Protocol"
+      }
+    }
+  },
+  "structured_decision": {
+    "recommended_action": "Wait out delay with conditional backup order",
+    "justification": "On-hand inventory of 3,200 units comfortably covers the 10-day demand forecast of 2,912 units. A buffer of 288 units remains, resulting in zero shortfall. Defaulting to wait avoids unnecessary premium supplier switching costs while original shipment remains in transit.",
+    "projected_shortfall_units": 0,
+    "delay_days": 10,
+    "forecasted_demand_units": 2912,
+    "options_evaluated": [
+      {
+        "option_name": "Wait out delay (Primary)",
+        "total_cost": 0.0,
+        "cost_delta": 0.0,
+        "lead_time_days": 10,
+        "pros": "Zero incremental cost delta; existing inventory avoids assembly disruption",
+        "cons": "Buffer margin tight at 288 units if port delay extends beyond 10 days"
+      },
+      {
+        "option_name": "Switch to Vertex Logistics",
+        "total_cost": 53760.0,
+        "cost_delta": 5760.0,
+        "lead_time_days": 6,
+        "pros": "Faster delivery by 4 days",
+        "cons": "Creates 5,000 unit overstock risk once original shipment clears customs"
+      }
+    ],
+    "react_trace": [
+      {
+        "reason": "Examine demand forecast and current stock on shared blackboard",
+        "act": "tools.check_inventory",
+        "observe": "Current stock 3,200 units >= forecasted demand 2,912 units. Shortfall = 0."
+      },
+      {
+        "reason": "Verify compliance audit from Google ADK via A2A protocol",
+        "act": "blackboard.read('compliance_audit')",
+        "observe": "ADK Auditor reports risk index 60/100, advising buffer monitoring."
+      },
+      {
+        "reason": "Synthesize final response aligned with Operations Manager persona",
+        "act": "manager_decision_synthesis",
+        "observe": "Zero shortfall requires default action 'wait' to prevent overstock."
+      }
+    ],
+    "risks_and_tradeoffs": "Port congestion could extend beyond 10 days; conditional trigger set to order 1,000 units from Vertex if stock drops below 500 units.",
+    "persona_context": "Operations Manager",
+    "validation_status": "VALID",
+    "validation_errors": []
+  }
+}
+

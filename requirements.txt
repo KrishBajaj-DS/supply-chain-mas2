@@ -1,0 +1,13 @@
+streamlit>=1.30.0
+crewai>=1.15.0
+crewai-tools[mcp]>=1.15.0
+google-adk>=2.14.0
+litellm>=1.100.0
+google-genai>=2.20.0
+python-dotenv>=1.0.0
+numpy>=1.26.0
+pandas>=2.0.0
+matplotlib>=3.8.0
+pydantic>=2.0.0
+mcp==1.30.0
+mcpadapt>=0.1.20

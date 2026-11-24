@@ -1,0 +1,8 @@
+agent,mean_latency_sec,min_latency_sec,max_latency_sec,n_calls
+Manager Agent,2527.68,7.18,41919.63,31
+Cost Agent,1144.5,4.02,26394.0,31
+Inventory Agent,938.56,3.7,26353.37,31
+Alternative Supplier Agent,881.47,4.33,26189.73,31
+Demand Forecasting Agent,877.67,3.49,26344.45,31
+HierarchicalManager,220.6,137.57,339.2,9
+Supplier Monitoring Agent,49.57,3.36,1220.61,31

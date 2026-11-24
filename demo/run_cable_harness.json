@@ -1,0 +1,112 @@
+{
+  "scenario_id": "cable_harness",
+  "disruption_scenario": "Supplier Z has a 7-day customs hold on 5,000 units of Cable-Harness at the border.",
+  "persona": "Supply Chain Planner",
+  "architecture": "sequential",
+  "guardrail_status": "PASSED (Category: ok)",
+  "blackboard_evolution": [
+    {
+      "step": 1,
+      "agent": "Supplier Monitoring Agent",
+      "section": "supplier_status",
+      "content": "SUP-105 shipment held at customs border inspection for 7 days; 5,000 units of Cable-Harness delayed."
+    },
+    {
+      "step": 2,
+      "agent": "Demand Forecasting Agent",
+      "section": "demand_forecast",
+      "content": "Projected demand over 7-day customs delay: 4,137 units of Cable-Harness."
+    },
+    {
+      "step": 3,
+      "agent": "Inventory Agent",
+      "section": "inventory_projection",
+      "content": "Current inventory: 5,500 units. Demand: 4,137 units. Surplus buffer: 1,363 units. Shortfall = 0 units. Assembly operations safe."
+    },
+    {
+      "step": 4,
+      "agent": "Alternative Supplier Agent",
+      "section": "alternative_suppliers",
+      "content": "Alternative domestic suppliers identified: Meridian Components (lead time 3 days), Pacific Cable (lead time 5 days)."
+    },
+    {
+      "step": 5,
+      "agent": "Cost Agent",
+      "section": "cost_analysis",
+      "content": "Wait option cost delta: $0.00. Domestic dual-sourcing option: $18,000 reservation fee."
+    },
+    {
+      "step": 6,
+      "agent": "Google-ADK:ComplianceRiskAgent",
+      "section": "compliance_audit",
+      "content": "A2A Audit completed: Vulnerability Index 42/100 (MODERATE). Customs regulatory delay routine. Recommendation: Buffer surplus covers disruption; hold off on secondary order."
+    }
+  ],
+  "a2a_dialogue": {
+    "protocol": "A2A/1.0",
+    "request": {
+      "sender": "CrewAI:SupplierMonitoringAgent",
+      "recipient": "Google-ADK:ComplianceRiskAgent",
+      "action": "AUDIT_SUPPLIER_RISK",
+      "payload": {"supplier_id": "SUP-105", "product": "Cable-Harness", "delay_days": 7, "shortfall_units": 0}
+    },
+    "response": {
+      "sender": "Google-ADK:ComplianceRiskAgent",
+      "recipient": "CrewAI:SupplierMonitoringAgent",
+      "performative": "INFORM",
+      "payload": {
+        "risk_tier": "MODERATE",
+        "risk_score_index": 42,
+        "recommendation": "Buffer surplus covers disruption; hold off on secondary order.",
+        "framework_provenance": "Google ADK Agent (google.adk) via A2A Protocol"
+      }
+    }
+  },
+  "structured_decision": {
+    "recommended_action": "Wait and monitor customs clearance progress with daily buffer check-ins",
+    "justification": "Current warehouse stock of 5,500 units provides a large surplus over the 4,137 units demanded during the 7-day hold, leaving a 1,363-unit safety buffer (over 2.3 days of supply). As Supply Chain Planner, maintaining current pipeline avoids duplicate ordering and capital lockup.",
+    "projected_shortfall_units": 0,
+    "delay_days": 7,
+    "forecasted_demand_units": 4137,
+    "options_evaluated": [
+      {
+        "option_name": "Wait and Monitor (Primary)",
+        "total_cost": 0.0,
+        "cost_delta": 0.0,
+        "lead_time_days": 7,
+        "pros": "Zero additional expenditure; surplus stock guarantees zero factory downtime",
+        "cons": "Buffer draws down by 75% by day 7"
+      },
+      {
+        "option_name": "Expedite Domestic Secondary Sourcing",
+        "total_cost": 22000.0,
+        "cost_delta": 22000.0,
+        "lead_time_days": 3,
+        "pros": "Immediate replenishment",
+        "cons": "Unnecessary 5,000 unit overstock when customs release occurs"
+      }
+    ],
+    "react_trace": [
+      {
+        "reason": "Verify stock coverage on blackboard",
+        "act": "tools.check_inventory",
+        "observe": "Inventory buffer surplus = 1,363 units. Zero shortfall."
+      },
+      {
+        "reason": "Review regulatory compliance feedback from Google ADK agent",
+        "act": "blackboard.read('compliance_audit')",
+        "observe": "ADK risk index is 42/100 (MODERATE). Single-source threshold acceptable."
+      },
+      {
+        "reason": "Apply Supply Chain Planner dual-sourcing reliability rule",
+        "act": "plan_monitoring_checkpoints",
+        "observe": "Surplus buffer is above minimum 2-day threshold; default to wait."
+      }
+    ],
+    "risks_and_tradeoffs": "If border hold extends past 9 days, initiate conditional domestic order for 1,500 units.",
+    "persona_context": "Supply Chain Planner",
+    "validation_status": "VALID",
+    "validation_errors": []
+  }
+}
+

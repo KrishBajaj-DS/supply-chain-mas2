@@ -1,0 +1,112 @@
+{
+  "scenario_id": "sensor_b",
+  "disruption_scenario": "Supplier Y experienced a major factory fire delaying shipment of 3,000 units of Sensor-B by 14 days.",
+  "persona": "CFO",
+  "architecture": "sequential",
+  "guardrail_status": "PASSED (Category: ok)",
+  "blackboard_evolution": [
+    {
+      "step": 1,
+      "agent": "Supplier Monitoring Agent",
+      "section": "supplier_status",
+      "content": "SUP-305 shipment delayed by 14 days due to catastrophic factory fire; 3,000 units of Sensor-B affected."
+    },
+    {
+      "step": 2,
+      "agent": "Demand Forecasting Agent",
+      "section": "demand_forecast",
+      "content": "Projected demand over 14-day delay: 2,176 units of Sensor-B."
+    },
+    {
+      "step": 3,
+      "agent": "Inventory Agent",
+      "section": "inventory_projection",
+      "content": "Current inventory: 1,400 units. Demand: 2,176 units. Shortfall = 776 units. Factory will shut down in 9 days without intervention."
+    },
+    {
+      "step": 4,
+      "agent": "Alternative Supplier Agent",
+      "section": "alternative_suppliers",
+      "content": "Candidate suppliers: Rapid Source Logistics (lead time 4 days, expedited air freight available for 800 units at $32/unit)."
+    },
+    {
+      "step": 5,
+      "agent": "Cost Agent",
+      "section": "cost_analysis",
+      "content": "Expedite 800 units via Rapid Source: $25,600 (incremental premium: $4,800). Factory downtime cost avoided: $180,000."
+    },
+    {
+      "step": 6,
+      "agent": "Google-ADK:ComplianceRiskAgent",
+      "section": "compliance_audit",
+      "content": "A2A Audit completed: Vulnerability Index 85/100 (CRITICAL). ISO 9001: True. Recommendation: Dual-sourcing mandatory. Authorize emergency bridge supply."
+    }
+  ],
+  "a2a_dialogue": {
+    "protocol": "A2A/1.0",
+    "request": {
+      "sender": "CrewAI:SupplierMonitoringAgent",
+      "recipient": "Google-ADK:ComplianceRiskAgent",
+      "action": "AUDIT_SUPPLIER_RISK",
+      "payload": {"supplier_id": "SUP-305", "product": "Sensor-B", "delay_days": 14, "shortfall_units": 776}
+    },
+    "response": {
+      "sender": "Google-ADK:ComplianceRiskAgent",
+      "recipient": "CrewAI:SupplierMonitoringAgent",
+      "performative": "INFORM",
+      "payload": {
+        "risk_tier": "CRITICAL",
+        "risk_score_index": 85,
+        "recommendation": "Dual-sourcing mandatory. Authorize emergency bridge supply.",
+        "framework_provenance": "Google ADK Agent (google.adk) via A2A Protocol"
+      }
+    }
+  },
+  "structured_decision": {
+    "recommended_action": "Authorize emergency bridge order of 800 units of Sensor-B from Rapid Source Logistics",
+    "justification": "On-hand stock of 1,400 units will exhaust in 9 days against 14-day demand of 2,176 units, leaving a severe projected shortfall of 776 units. As CFO, approving an expedited bridge order of exactly 800 units ($25,600) covers the gap at minimal expense, avoiding $180,000 in assembly line downtime.",
+    "projected_shortfall_units": 776,
+    "delay_days": 14,
+    "forecasted_demand_units": 2176,
+    "options_evaluated": [
+      {
+        "option_name": "Bridge Order 800 units from Rapid Source Logistics",
+        "total_cost": 25600.0,
+        "cost_delta": 4800.0,
+        "lead_time_days": 4,
+        "pros": "Closes 776-unit shortfall within 4 days; avoids $180k idle downtime cost",
+        "cons": "Requires $4,800 air freight surcharge"
+      },
+      {
+        "option_name": "Full Replacement Order 3,000 units from Rapid Source",
+        "total_cost": 96000.0,
+        "cost_delta": 24000.0,
+        "lead_time_days": 4,
+        "pros": "Replaces entire shipment",
+        "cons": "Excessive capital outlay when original shipment is merely delayed"
+      }
+    ],
+    "react_trace": [
+      {
+        "reason": "Calculate exact shortfall from blackboard inventory data",
+        "act": "tools.check_inventory",
+        "observe": "Demand 2,176 - Stock 1,400 = Shortfall of 776 units."
+      },
+      {
+        "reason": "Consult Google ADK Compliance Audit via A2A protocol",
+        "act": "blackboard.read('compliance_audit')",
+        "observe": "Vulnerability index 85/100 (CRITICAL). ADK recommends dual-sourcing."
+      },
+      {
+        "reason": "Apply CFO cost-minimization mandate to shortfall quantity",
+        "act": "calculate_bridge_cost",
+        "observe": "800 units x $32 = $25,600. Lowest cost to restore assembly."
+      }
+    ],
+    "risks_and_tradeoffs": "Partial overstock of 24 units after SUP-305 arrives; original contract requires SLA renegotiation.",
+    "persona_context": "CFO",
+    "validation_status": "VALID",
+    "validation_errors": []
+  }
+}
+
