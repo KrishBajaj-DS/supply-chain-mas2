@@ -19,7 +19,16 @@ except ImportError:
             return f
         return decorator
 from src.guardrails import guarded
-from src.mock_data import SHIPMENTS, INVENTORY, SALES_HISTORY, MARKET_UNIT_COST
+from src.mock_data import (
+    SHIPMENTS,
+    INVENTORY,
+    SALES_HISTORY,
+    MARKET_UNIT_COST,
+    get_shipment_data,
+    get_inventory_data,
+    get_sales_history,
+    get_market_unit_cost,
+)
 from src.rag_retriever import get_retriever
 import numpy as np
 
@@ -30,7 +39,7 @@ def check_shipment_status(supplier_id: str) -> str:
     """Check the current shipment status for a given supplier ID.
     Returns delay info, affected product, and quantity impacted.
     Pass the supplier_id specified in the disruption scenario (e.g. 'SUP-201', 'SUP-305', 'SUP-410')."""
-    data = SHIPMENTS.get(supplier_id)
+    data = get_shipment_data(supplier_id)
     if not data:
         return f"No shipment record found for supplier_id={supplier_id}."
     return (
@@ -47,7 +56,7 @@ def forecast_demand(product: str, days_ahead: int = 10) -> str:
     """Forecast expected demand (units) for a product over the next N days
     using a simple linear trend fit on the last 14 days of sales history.
     Pass the product affected by the disruption (e.g. 'Widget-A', 'Sensor-B', 'Cable-Harness')."""
-    history = SALES_HISTORY.get(product)
+    history = get_sales_history(product)
     if not history:
         return f"No sales history found for product={product}."
 
@@ -75,7 +84,7 @@ def check_inventory(product: str, forecasted_units_needed: int, delay_days: int)
     """Check current inventory for a product and project whether a shortage
     will occur before a delayed shipment arrives. Provide the forecasted
     units needed over the delay window and the delay length in days."""
-    inv = INVENTORY.get(product)
+    inv = get_inventory_data(product)
     if not inv:
         return f"No inventory record found for product={product}."
 
@@ -129,7 +138,7 @@ def calculate_cost_impact(product: str, units: int, option: str, cost_premium_pc
     'switch to alternative supplier', 'expedite shipment').
     cost_premium_pct is the % above/below market rate for that option
     (e.g. 25 for +25%, -12 for -12%), from the supplier's profile if known."""
-    base_cost = MARKET_UNIT_COST.get(product)
+    base_cost = get_market_unit_cost(product)
     if base_cost is None:
         return f"No baseline cost data found for product={product}."
 
